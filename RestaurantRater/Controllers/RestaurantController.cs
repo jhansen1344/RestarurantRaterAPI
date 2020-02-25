@@ -13,10 +13,11 @@ namespace RestaurantRater.Controllers
     public class RestaurantController : ApiController
     {
         private readonly RestaurantDbContext _context = new RestaurantDbContext();
+        [HttpPost]
         //Post
         public async Task<IHttpActionResult> PostRestaurant(Restaurant restaurant)
         {
-            if(ModelState.IsValid && restaurant !=null)
+            if (ModelState.IsValid && restaurant != null)
             {
                 _context.Restaurants.Add(restaurant);
                 await _context.SaveChangesAsync();
@@ -25,7 +26,7 @@ namespace RestaurantRater.Controllers
 
             return BadRequest(ModelState);
         }
-
+        [HttpGet]
         //Get All
 
         public async Task<IHttpActionResult> GetAll()
@@ -33,21 +34,39 @@ namespace RestaurantRater.Controllers
             List<Restaurant> restaurants = await _context.Restaurants.ToListAsync();
             return Ok(restaurants);
         }
-
+        [HttpGet]
         //Get by ID
         public async Task<IHttpActionResult> GetById(int id)
         {
-            Restaurant restaurant =  await _context.Restaurants.FindAsync(id);
-            if(restaurant==null)
+            Restaurant restaurant = await _context.Restaurants.FindAsync(id);
+            if (restaurant == null)
             {
                 return NotFound();
             }
-                return Ok(restaurant);
+            return Ok(restaurant);
         }
         //Put (Update Restaurant)
-
+        [HttpPut]
+        public async Task<IHttpActionResult> UpdateRestaurant([FromUri] int id, [FromBody]Restaurant model)
+        {
+            if(ModelState.IsValid && model !=null)
+            {
+                //This is our entity
+                Restaurant restaurant = await _context.Restaurants.FindAsync(id);
+                if (restaurant == null)
+                {
+                    return NotFound();
+                }
+                restaurant.Name = model.Name;
+                restaurant.Rating = model.Rating;
+                restaurant.Style = restaurant.Style;
+                restaurant.DollarSigns = model.DollarSigns;
+                await _context.SaveChangesAsync();
+                return Ok();
+            }
+            return BadRequest(ModelState);
+        }
         //Delete by ID (Delete Restaurant)
-
 
     }
 }
